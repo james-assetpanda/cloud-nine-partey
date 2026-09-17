@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
 <title>Zoe Summer Turns One!</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Parisienne&family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap">
 <style>
@@ -386,6 +387,63 @@
     @keyframes sparkflick{from{opacity:.5;transform:scale(.7)}to{opacity:1;transform:scale(1.15)}}
   }
 
+
+  /* ---------- Name gate ---------- */
+  body.locked{overflow:hidden;}
+  .gate{
+    position:fixed;inset:0;z-index:100;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(180deg,var(--sky-top) 0%,var(--sky-bottom) 100%);
+    padding:1.5rem;
+    opacity:1;transition:opacity .6s ease;
+  }
+  .gate.open{opacity:0;pointer-events:none;}
+  .gate-card{
+    background:var(--panel);
+    border-radius:32px;
+    box-shadow:0 20px 44px var(--shadow);
+    padding:2.6rem 2rem 2.2rem;
+    max-width:430px;width:100%;
+    text-align:center;
+    position:relative;
+  }
+  .gate-card .peek{position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:72px;}
+  .gate-title{
+    font-family:'Parisienne',cursive;
+    font-size:clamp(2rem,6vw,2.6rem);
+    color:var(--pink-deep);
+    line-height:1.15;
+  }
+  .gate-q{margin-top:.7rem;font-weight:700;color:var(--ink);}
+  .gate-input{
+    margin-top:1.2rem;width:100%;
+    padding:.85rem 1.1rem;
+    border:2px solid var(--pink);
+    border-radius:999px;
+    background:var(--sky-top);
+    color:var(--ink);
+    font-family:'Nunito',sans-serif;
+    font-weight:700;font-size:1.05rem;
+    text-align:center;outline:none;
+  }
+  .gate-input:focus{border-color:var(--pink-deep);}
+  .gate-btn{
+    margin-top:1rem;
+    display:inline-block;
+    background:linear-gradient(135deg,var(--pink) 0%,var(--pink-deep) 100%);
+    color:#fff;border:none;cursor:pointer;
+    font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1.1rem;
+    padding:.85rem 2.4rem;border-radius:999px;
+    box-shadow:0 8px 20px color-mix(in srgb,var(--pink-deep) 45%,transparent);
+  }
+  .gate-btn:focus-visible{outline:3px solid var(--lavender);outline-offset:3px;}
+  .gate-msg{margin-top:.9rem;font-weight:700;color:var(--pink-deep);min-height:1.4em;font-size:.95rem;}
+  .gate-msg.yay{color:var(--ink);}
+  @media (prefers-reduced-motion: no-preference){
+    .gate-card.shake{animation:shake .4s ease;}
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}50%{transform:translateX(7px)}75%{transform:translateX(-4px)}}
+  }
+
   footer{
     text-align:center;
     padding:2rem 1.4rem 3rem;
@@ -396,6 +454,32 @@
 </style>
 </head>
 <body>
+
+<!-- Invite-only gate: guests type the birthday girl's name to enter -->
+<div class="gate" id="gate">
+  <div class="gate-card" id="gateCard">
+    <svg class="peek" viewBox="0 0 72 60" aria-hidden="true">
+      <path d="M36 14 c-10-14 -32-9 -32 7 c0 12 16 24 32 36 c16-12 32-24 32-36 c0-16 -22-21 -32-7z" fill="var(--pink)"/>
+    </svg>
+    <p class="gate-title">Pssst… this party is invite-only!</p>
+    <p class="gate-q" id="gateQ">What's the birthday girl's name to continue?</p>
+    <input class="gate-input" id="gateInput" type="text" autocomplete="off" autocapitalize="none" aria-labelledby="gateQ" placeholder="Type her name…">
+    <button class="gate-btn" id="gateBtn" type="button">Let me in 🎀</button>
+    <p class="gate-msg" id="gateMsg" role="status"></p>
+  </div>
+</div>
+<script>
+// Returning guests skip the gate instantly
+(function(){
+  try{
+    if(localStorage.getItem("zoe-gate-ok")==="1"){
+      var g=document.getElementById("gate"); if(g) g.remove();
+      return;
+    }
+  }catch(e){}
+  document.body.classList.add("locked");
+})();
+</script>
 
 <!-- Living sky background: clouds drift across, balloons float up -->
 <div class="sky-layer" aria-hidden="true">
@@ -670,6 +754,51 @@
     });
   },{threshold:.15});
   frames.forEach(function(f){ io.observe(f); });
+})();
+
+// Name gate: only guests who know the birthday girl get in
+(function(){
+  var gate = document.getElementById("gate");
+  if(!gate) return;
+  var card = document.getElementById("gateCard"),
+      input = document.getElementById("gateInput"),
+      btn = document.getElementById("gateBtn"),
+      msg = document.getElementById("gateMsg");
+  function normalize(v){
+    return v.toLowerCase().replace(/[^a-z]+/g, "");
+  }
+  function unlock(){
+    try{ localStorage.setItem("zoe-gate-ok","1"); }catch(e){}
+    msg.textContent = "That's her! Welcome to the party 🎀";
+    msg.classList.add("yay");
+    setTimeout(function(){
+      gate.classList.add("open");
+      document.body.classList.remove("locked");
+      setTimeout(function(){ gate.remove(); }, 650);
+    }, 700);
+  }
+  function check(){
+    var v = normalize(input.value);
+    if(v === "zoesummer" || v === "zoesummerpilapil"){
+      unlock();
+    }else if(v.indexOf("zoe") !== -1){
+      msg.textContent = "So close! She has two names — the second one is a season ☀️";
+      wiggle();
+    }else{
+      msg.textContent = "Hmm, not quite — better ask mommy or daddy! 💗";
+      wiggle();
+    }
+  }
+  function wiggle(){
+    card.classList.remove("shake");
+    void card.offsetWidth;
+    card.classList.add("shake");
+    input.select();
+  }
+  btn.addEventListener("click", check);
+  input.addEventListener("keydown", function(e){
+    if(e.key === "Enter") check();
+  });
 })();
 </script>
 </body>
