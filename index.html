@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Zoe Summer Turns One!</title>
+<title>You're Invited! 🎀</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Parisienne&family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap">
 <style>
   :root{
@@ -469,16 +469,8 @@
   </div>
 </div>
 <script>
-// Returning guests skip the gate instantly
-(function(){
-  try{
-    if(localStorage.getItem("zoe-gate-ok")==="1"){
-      var g=document.getElementById("gate"); if(g) g.remove();
-      return;
-    }
-  }catch(e){}
-  document.body.classList.add("locked");
-})();
+// The gate greets every visit — no remembering devices
+document.body.classList.add("locked");
 </script>
 
 <!-- Living sky background: clouds drift across, balloons float up -->
@@ -768,8 +760,8 @@
     return v.toLowerCase().replace(/[^a-z]+/g, "");
   }
   function unlock(){
-    try{ localStorage.setItem("zoe-gate-ok","1"); }catch(e){}
     msg.textContent = "That's her! Welcome to the party 🎀";
+    document.title = "Zoe Summer Turns One!";
     msg.classList.add("yay");
     setTimeout(function(){
       gate.classList.add("open");
